@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -36,54 +40,52 @@ class CacheApplicationTests {
 	void parallelCacheTest() {
 		//th1 and th2 - 3 seconds
 		//th3 and th4 - fast
-		Thread th1 = new Thread(() -> {
+		FutureTask<Object> th1 = new FutureTask<>(() -> {
 			try {
-				long res = calculator.multiply(5, 6);
-				assertThat(res).isEqualTo(30);
+				return calculator.multiply(5, 6);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				return null;
 			}
 		});
 
-		Thread th2 = new Thread(() -> {
+		FutureTask<Object> th2 = new FutureTask<>(() -> {
 			try {
-				double res = calculator.divide(12, 2);
-				assertThat(res).isEqualTo(6);
+				return calculator.divide(12, 2);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				return null;
 			}
 		});
 
-		Thread th3 = new Thread(() -> {
+		FutureTask<Object> th3 = new FutureTask<>(() -> {
 			try {
-				long res = calculator.multiply(5, 6);
-				assertThat(res).isEqualTo(30);
+				return calculator.multiply(5, 6);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				return null;
 			}
 		});
 
-		Thread th4 = new Thread(() -> {
+		FutureTask<Object> th4 = new FutureTask<>(() -> {
 			try {
-				double res = calculator.divide(12, 2);
-				assertThat(res).isEqualTo(6);
+				return calculator.divide(12, 2);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				return null;
 			}
 		});
 
 		long start = System.currentTimeMillis()/1000;
-		th1.start();
-		th2.start();
-		th3.start();
-		th4.start();
+		new Thread(th1).start();
+		new Thread(th2).start();
+		new Thread(th3).start();
+		new Thread(th4).start();
 
 		try {
-			th1.join();
-			th2.join();
-			th3.join();
-			th4.join();
-		} catch (InterruptedException e) {
+			assertThat(th1.get()).isEqualTo(th3.get()).isEqualTo(30L);
+			assertThat(th2.get()).isEqualTo(th4.get()).isEqualTo(6.0);
+		} catch (ExecutionException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		long end = System.currentTimeMillis()/1000;
