@@ -1,7 +1,6 @@
 package com.cache;
 
 import com.cache.MainComponent.Cache;
-import com.cache.MainComponent.CacheConcurrently;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -20,13 +19,13 @@ public class Calculator {
         return a-b;
     }
 
-    @CacheConcurrently
+    @Cache
     public long multiply(long a, long b) throws InterruptedException {
         TimeUnit.SECONDS.sleep(3);
         return a*b;
     }
 
-    @CacheConcurrently
+    @Cache
     public double divide(double a, double b) throws InterruptedException {
         TimeUnit.SECONDS.sleep(3);
         return a/b;
